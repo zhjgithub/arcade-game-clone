@@ -130,6 +130,7 @@ var Engine = (function(global) {
      */
     function reset() {
         // 空操作
+        player.reset();
     }
 
     /* 紧接着我们来加载我们知道的需要来绘制我们游戏关卡的图片。然后把 init 方法设置为回调函数。
@@ -148,4 +149,6 @@ var Engine = (function(global) {
      * 对象。从而开发者就可以在他们的app.js文件里面更容易的使用它。
      */
     global.ctx = ctx;
+
+    return {reset: reset};
 })(this);
