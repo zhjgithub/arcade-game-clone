@@ -5,6 +5,7 @@ var PLAYER_LEFT_LIMIT = 0;
 var PLAYER_RIGHT_LIMIT = CELL_WIDTH * 4;
 var PLAYER_UP_LIMIT = CELL_HEIGHT * 0.3;
 var PLAYER_DOWN_LIMIT = CELL_HEIGHT * (5 - 0.3);
+var GAME_TIME = 60;
 
 var allPlayers = [
     'images/char-boy.png',
@@ -85,18 +86,22 @@ Enemy.prototype.checkCollision = function () {
 // 现在实现你自己的玩家类
 // 这个类需要一个 update() 函数， render() 函数和一个 handleInput()函数
 var Player = function () {
-    this.ready = false;
+    this.start = false;
     this.currentSelected = 0;
     this.sprite = '';
     this.score = 0;
 };
 
 /**
- * @description reset player's position when collision happened
+ * @description reset player's position when collision happened and check the time
  */
 Player.prototype.update = function () {
     if (this.collided) {
         this.reset();
+    }
+
+    if (this.start && (Date.now() / 1000 - this.startTime) > GAME_TIME) {
+        this.start = false;
     }
 };
 
@@ -104,7 +109,7 @@ Player.prototype.update = function () {
  * @description display all characters that could be selected or the current player afte selected
  */
 Player.prototype.render = function () {
-    if (this.ready) {
+    if (this.start) {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     } else {
         ctx.drawImage(Resources.get('images/Selector.png'), CELL_WIDTH * this.currentSelected, PLAYER_DOWN_LIMIT);
@@ -119,16 +124,27 @@ Player.prototype.render = function () {
     }
 
     this.displayScore();
+    this.displayTime();
 };
 
 /**
- * @description display the score on top right
+ * @description display the score on the top right
  */
 Player.prototype.displayScore = function () {
     ctx.clearRect(505, 0, -100, 20);
     ctx.font = '16px sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText('Score ' + this.score, 500, 20);
+};
+
+/**
+ * @description display game time on the top
+ */
+Player.prototype.displayTime = function () {
+    ctx.clearRect(ctx.canvas.width / 2 - 50, 0, 100, 20);
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Time ' + (this.start ? Math.ceil(this.startTime + GAME_TIME - Date.now() / 1000).toString() : GAME_TIME.toString()), ctx.canvas.width / 2, 20);
 };
 
 /**
@@ -149,7 +165,7 @@ Player.prototype.handleInput = function (direction) {
         return;
     }
 
-    if (this.ready) {
+    if (this.start) {
         if (direction === 'left') {
             this.x -= CELL_WIDTH;
             if (this.x < PLAYER_LEFT_LIMIT) {
@@ -185,7 +201,9 @@ Player.prototype.handleInput = function (direction) {
             }
         } else if (direction === 'enter') {
             this.sprite = allPlayers[this.currentSelected];
-            this.ready = true;
+            this.start = true;
+            this.startTime = Date.now() / 1000;
+            this.score = 0;
             this.reset();
             ctx.clearRect(0, ctx.canvas.height, ctx.canvas.width, -16);
         }
