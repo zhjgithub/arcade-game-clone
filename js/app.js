@@ -82,6 +82,11 @@ Player.prototype.render = function () {
         for (var i = 0; i < allPlayers.length; i++) {
             ctx.drawImage(Resources.get(allPlayers[i]), CELL_WIDTH * i, PLAYER_DOWN_LIMIT);
         }
+
+        ctx.clearRect(0, ctx.canvas.height, ctx.canvas.width, -16);
+        ctx.font = '16px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Press Enter to select a character', ctx.canvas.width / 2, ctx.canvas.height);
     }
 
     this.displayScore();
@@ -152,6 +157,7 @@ Player.prototype.handleInput = function (direction) {
             this.sprite = allPlayers[this.currentSelected];
             this.ready = true;
             this.reset();
+            ctx.clearRect(0, ctx.canvas.height, ctx.canvas.width, -16);
         }
     }
 };
