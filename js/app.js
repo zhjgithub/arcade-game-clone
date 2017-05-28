@@ -1,6 +1,12 @@
 // cell width and height
 var CELL_WIDTH = 101;
 var CELL_HEIGHT = 83;
+var PLAYER_LEFT_LIMIT = 0;
+var PLAYER_RIGHT_LIMIT = CELL_WIDTH * 4;
+var PLAYER_UP_LIMIT = CELL_HEIGHT * 0.3;
+var PLAYER_DOWN_LIMIT = CELL_HEIGHT * (5 - 0.3);
+var successCount = 0;
+var failureCount = 0;
 
 /**
  * @description get a random integer between two values
@@ -29,8 +35,9 @@ Enemy.prototype.update = function (dt) {
     // 你应该给每一次的移动都乘以 dt 参数，以此来保证游戏在所有的电脑上
     // 都是以同样的速度运行的
     if (this.y - 1 < player.y && player.y < this.y + 1 &&
-        player.x - CELL_WIDTH * 0.5 < this.x && this.x < player.x + CELL_WIDTH * 0.5) {
-        console.log('Failure');
+        player.x < this.x + CELL_WIDTH * 0.5 && this.x < player.x + CELL_WIDTH * 0.5) {
+        failureCount++;
+        console.log('Failure ' + failureCount);
         Engine.reset();
     }
 
@@ -74,7 +81,7 @@ Player.prototype.render = function () {
  */
 Player.prototype.reset = function () {
     this.x = CELL_WIDTH * 3;
-    this.y = CELL_HEIGHT * (5 - 0.3);
+    this.y = PLAYER_DOWN_LIMIT;
 };
 
 /**
@@ -87,24 +94,26 @@ Player.prototype.handleInput = function (direction) {
     }
 
     if (direction === 'left') {
-        if (this.x > 0) {
-            this.x -= CELL_WIDTH;
-        }
-    } else if (direction === 'up') {
-        if (this.y > CELL_HEIGHT * 0.3) {
-            this.y -= CELL_HEIGHT;
-            if (this.y <= CELL_HEIGHT * 0.3) {
-                console.log('Success');
-                Engine.reset();
-            }
+        this.x -= CELL_WIDTH;
+        if (this.x < PLAYER_LEFT_LIMIT) {
+            this.x = PLAYER_LEFT_LIMIT;
         }
     } else if (direction === 'right') {
-        if (this.x < CELL_WIDTH * 4) {
-            this.x += CELL_WIDTH;
+        this.x += CELL_WIDTH;
+        if (this.x > PLAYER_RIGHT_LIMIT) {
+            this.x = PLAYER_RIGHT_LIMIT;
+        }
+    } else if (direction === 'up') {
+        this.y -= CELL_HEIGHT;
+        if (this.y < PLAYER_UP_LIMIT) {
+            successCount++;
+            console.log('Success ' + successCount);
+            Engine.reset();
         }
     } else if (direction === 'down') {
-        if (this.y < CELL_HEIGHT * 4) {
-            this.y += CELL_HEIGHT;
+        this.y += CELL_HEIGHT;
+        if (this.y > PLAYER_DOWN_LIMIT) {
+            this.y = PLAYER_DOWN_LIMIT;
         }
     }
 };
