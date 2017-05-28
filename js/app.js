@@ -71,6 +71,9 @@ Player.prototype.update = function (dt) {
     // 都是以同样的速度运行的
 };
 
+/**
+ * @description display all characters that could be selected or the current player afte selected
+ */
 Player.prototype.render = function () {
     if (this.ready) {
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -81,6 +84,13 @@ Player.prototype.render = function () {
         }
     }
 
+    this.displayScore();
+};
+
+/**
+ * @description display the score on top right
+ */
+player.prototype.displayScore = function () {
     ctx.clearRect(505, 0, -100, 20);
     ctx.font = '16px sans-serif';
     ctx.textAlign = 'right';
@@ -96,7 +106,7 @@ Player.prototype.reset = function () {
 };
 
 /**
- * @description move the player by use of arrows and constrain the player in boundary
+ * @description select characters or move the player by use of arrows and constrain the player in boundary
  * @param {string} direction - the direction by keyboard input
  */
 Player.prototype.handleInput = function (direction) {
@@ -160,9 +170,7 @@ var allPlayers = [
 ];
 
 /**
- * @description init the enemies and the player data
- * @param {type} parameter - text
- * @returns {type} return value
+ * @description init the enemies
  */
 function Init() {
     var enemy;
