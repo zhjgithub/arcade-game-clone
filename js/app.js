@@ -64,7 +64,9 @@ Enemy.prototype.reset = function () {
 // 现在实现你自己的玩家类
 // 这个类需要一个 update() 函数， render() 函数和一个 handleInput()函数
 var Player = function () {
-    this.sprite = 'images/char-boy.png';
+    this.ready = false;
+    this.currentSelected = 0;
+    this.sprite = '';
 };
 
 Player.prototype.update = function (dt) {
@@ -73,14 +75,21 @@ Player.prototype.update = function (dt) {
 };
 
 Player.prototype.render = function () {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    if (this.ready) {
+        ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+    } else {
+        ctx.drawImage(Resources.get('images/Selector.png'), CELL_WIDTH * this.currentSelected, PLAYER_DOWN_LIMIT);
+        for (var i = 0; i < allPlayers.length; i++) {
+            ctx.drawImage(Resources.get(allPlayers[i]), CELL_WIDTH * i, PLAYER_DOWN_LIMIT);
+        }
+    }
 };
 
 /**
  * @description reset the player's position to the bottom when reach the river or collided by enemy
  */
 Player.prototype.reset = function () {
-    this.x = CELL_WIDTH * 3;
+    this.x = CELL_WIDTH * this.currentSelected;
     this.y = PLAYER_DOWN_LIMIT;
 };
 
@@ -93,27 +102,45 @@ Player.prototype.handleInput = function (direction) {
         return;
     }
 
-    if (direction === 'left') {
-        this.x -= CELL_WIDTH;
-        if (this.x < PLAYER_LEFT_LIMIT) {
-            this.x = PLAYER_LEFT_LIMIT;
+    if (this.ready) {
+        if (direction === 'left') {
+            this.x -= CELL_WIDTH;
+            if (this.x < PLAYER_LEFT_LIMIT) {
+                this.x = PLAYER_LEFT_LIMIT;
+            }
+        } else if (direction === 'right') {
+            this.x += CELL_WIDTH;
+            if (this.x > PLAYER_RIGHT_LIMIT) {
+                this.x = PLAYER_RIGHT_LIMIT;
+            }
+        } else if (direction === 'up') {
+            this.y -= CELL_HEIGHT;
+            if (this.y < PLAYER_UP_LIMIT) {
+                successCount++;
+                console.log('Success ' + successCount);
+                Engine.reset();
+            }
+        } else if (direction === 'down') {
+            this.y += CELL_HEIGHT;
+            if (this.y > PLAYER_DOWN_LIMIT) {
+                this.y = PLAYER_DOWN_LIMIT;
+            }
         }
-    } else if (direction === 'right') {
-        this.x += CELL_WIDTH;
-        if (this.x > PLAYER_RIGHT_LIMIT) {
-            this.x = PLAYER_RIGHT_LIMIT;
-        }
-    } else if (direction === 'up') {
-        this.y -= CELL_HEIGHT;
-        if (this.y < PLAYER_UP_LIMIT) {
-            successCount++;
-            console.log('Success ' + successCount);
-            Engine.reset();
-        }
-    } else if (direction === 'down') {
-        this.y += CELL_HEIGHT;
-        if (this.y > PLAYER_DOWN_LIMIT) {
-            this.y = PLAYER_DOWN_LIMIT;
+    } else {
+        if (direction === 'left') {
+            this.currentSelected--;
+            if (this.currentSelected < 0) {
+                this.currentSelected = allPlayers.length - 1;
+            }
+        } else if (direction === 'right') {
+            this.currentSelected++;
+            if (this.currentSelected >= allPlayers.length) {
+                this.currentSelected = 0;
+            }
+        } else if (direction === 'enter') {
+            this.sprite = allPlayers[this.currentSelected];
+            this.ready = true;
+            this.reset();
         }
     }
 };
@@ -123,6 +150,13 @@ Player.prototype.handleInput = function (direction) {
 // 把玩家对象放进一个叫 player 的变量里面
 var allEnemies = [];
 var player = new Player();
+var allPlayers = [
+    'images/char-boy.png',
+    'images/char-cat-girl.png',
+    'images/char-horn-girl.png',
+    'images/char-pink-girl.png',
+    'images/char-princess-girl.png'
+];
 
 /**
  * @description init the enemies and the player data
@@ -137,8 +171,6 @@ function Init() {
         enemy.reset();
         allEnemies.push(enemy);
     }
-
-    player.reset();
 }
 
 // 这段代码监听游戏玩家的键盘点击事件并且代表将按键的关键数字送到 Play.handleInput()
@@ -148,7 +180,8 @@ document.addEventListener('keyup', function (e) {
         37: 'left',
         38: 'up',
         39: 'right',
-        40: 'down'
+        40: 'down',
+        13: 'enter'
     };
 
     player.handleInput(allowedKeys[e.keyCode]);
