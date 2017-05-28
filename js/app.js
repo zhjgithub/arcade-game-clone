@@ -5,8 +5,6 @@ var PLAYER_LEFT_LIMIT = 0;
 var PLAYER_RIGHT_LIMIT = CELL_WIDTH * 4;
 var PLAYER_UP_LIMIT = CELL_HEIGHT * 0.3;
 var PLAYER_DOWN_LIMIT = CELL_HEIGHT * (5 - 0.3);
-var successCount = 0;
-var failureCount = 0;
 
 /**
  * @description get a random integer between two values
@@ -36,8 +34,6 @@ Enemy.prototype.update = function (dt) {
     // 都是以同样的速度运行的
     if (this.y - 1 < player.y && player.y < this.y + 1 &&
         player.x < this.x + CELL_WIDTH * 0.5 && this.x < player.x + CELL_WIDTH * 0.5) {
-        failureCount++;
-        console.log('Failure ' + failureCount);
         Engine.reset();
     }
 
@@ -67,6 +63,7 @@ var Player = function () {
     this.ready = false;
     this.currentSelected = 0;
     this.sprite = '';
+    this.score = 0;
 };
 
 Player.prototype.update = function (dt) {
@@ -83,6 +80,11 @@ Player.prototype.render = function () {
             ctx.drawImage(Resources.get(allPlayers[i]), CELL_WIDTH * i, PLAYER_DOWN_LIMIT);
         }
     }
+
+    ctx.clearRect(505, 0, -100, 20);
+    ctx.font = '16px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('Score ' + this.score, 500, 20);
 };
 
 /**
@@ -116,8 +118,7 @@ Player.prototype.handleInput = function (direction) {
         } else if (direction === 'up') {
             this.y -= CELL_HEIGHT;
             if (this.y < PLAYER_UP_LIMIT) {
-                successCount++;
-                console.log('Success ' + successCount);
+                this.score += 10;
                 Engine.reset();
             }
         } else if (direction === 'down') {
