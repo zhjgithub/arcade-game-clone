@@ -6,6 +6,20 @@ var PLAYER_RIGHT_LIMIT = CELL_WIDTH * 4;
 var PLAYER_UP_LIMIT = CELL_HEIGHT * 0.3;
 var PLAYER_DOWN_LIMIT = CELL_HEIGHT * (5 - 0.3);
 
+var allPlayers = [
+    'images/char-boy.png',
+    'images/char-cat-girl.png',
+    'images/char-horn-girl.png',
+    'images/char-pink-girl.png',
+    'images/char-princess-girl.png'
+];
+
+var collectItems = [
+    'images/Gem Blue.png',
+    'images/Gem Green.png',
+    'images/Gem Orange.png',
+];
+
 /**
  * @description get a random integer between two values
  * @param {number} min - the result is greater than or equal to min
@@ -32,11 +46,6 @@ var Enemy = function () {
 Enemy.prototype.update = function (dt) {
     // 你应该给每一次的移动都乘以 dt 参数，以此来保证游戏在所有的电脑上
     // 都是以同样的速度运行的
-    if (this.y - 1 < player.y && player.y < this.y + 1 &&
-        player.x < this.x + CELL_WIDTH * 0.5 && this.x < player.x + CELL_WIDTH * 0.5) {
-        Engine.reset();
-    }
-
     this.x += this.speed * dt;
     if (this.x >= CELL_WIDTH * 5) {
         this.reset();
@@ -57,6 +66,22 @@ Enemy.prototype.reset = function () {
     this.speed = CELL_WIDTH * getRandomInt(2, 5);
 };
 
+/**
+ * @description check collision between enemies and player
+ * @returns {Boolean} collision will return true
+ */
+Enemy.prototype.checkCollision = function () {
+    var collided = false;
+
+    if (this.y - 0.5 < player.y && player.y < this.y + 0.5 &&
+        player.x < this.x + CELL_WIDTH * 0.5 && this.x < player.x + CELL_WIDTH * 0.5) {
+        player.collided = true;
+        collided = true;
+    }
+
+    return collided;
+};
+
 // 现在实现你自己的玩家类
 // 这个类需要一个 update() 函数， render() 函数和一个 handleInput()函数
 var Player = function () {
@@ -66,9 +91,13 @@ var Player = function () {
     this.score = 0;
 };
 
-Player.prototype.update = function (dt) {
-    // 你应该给每一次的移动都乘以 dt 参数，以此来保证游戏在所有的电脑上
-    // 都是以同样的速度运行的
+/**
+ * @description reset player's position when collision happened
+ */
+Player.prototype.update = function () {
+    if (this.collided) {
+        this.reset();
+    }
 };
 
 /**
@@ -106,6 +135,7 @@ Player.prototype.displayScore = function () {
  * @description reset the player's position to the bottom when reach the river or collided by enemy
  */
 Player.prototype.reset = function () {
+    this.collided = false;
     this.x = CELL_WIDTH * this.currentSelected;
     this.y = PLAYER_DOWN_LIMIT;
 };
@@ -134,7 +164,7 @@ Player.prototype.handleInput = function (direction) {
             this.y -= CELL_HEIGHT;
             if (this.y < PLAYER_UP_LIMIT) {
                 this.score += 10;
-                Engine.reset();
+                this.reset();
             }
         } else if (direction === 'down') {
             this.y += CELL_HEIGHT;
@@ -162,18 +192,52 @@ Player.prototype.handleInput = function (direction) {
     }
 };
 
+/**
+ * @description Collectible item
+ * @constructor
+ */
+var Item = function () {
+    this.reset();
+};
+
+/**
+ * @description add score and genreate a new item when player get item
+ */
+Item.prototype.update = function () {
+    if (this.collided) {
+        player.score += 5;
+        this.reset();
+    }
+};
+
+Item.prototype.render = function () {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+/**
+ * @description set item image and position
+ */
+Item.prototype.reset = function () {
+    this.collided = false;
+    this.sprite = collectItems[getRandomInt(0, collectItems.length - 1)];
+    this.x = CELL_WIDTH * getRandomInt(0, 4);
+    this.y = CELL_HEIGHT * (getRandomInt(1, 3) - 0.3);
+};
+
+/**
+ * @description check player get item
+ */
+Item.prototype.checkCollision = function () {
+    this.collided = this.y - 0.5 < player.y && player.y < this.y + 0.5 &&
+        player.x < this.x + CELL_WIDTH * 0.5 && this.x < player.x + CELL_WIDTH * 0.5;
+};
+
 // 现在实例化你的所有对象
 // 把所有敌人的对象都放进一个叫 allEnemies 的数组里面
 // 把玩家对象放进一个叫 player 的变量里面
 var allEnemies = [];
 var player = new Player();
-var allPlayers = [
-    'images/char-boy.png',
-    'images/char-cat-girl.png',
-    'images/char-horn-girl.png',
-    'images/char-pink-girl.png',
-    'images/char-princess-girl.png'
-];
+var item = new Item();
 
 /**
  * @description init the enemies

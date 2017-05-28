@@ -12,4 +12,4 @@ Use left and right arrow to select one character, press Enter to use the charact
 
 When have selected a character, use the arrows on keyboard to move the character and avoid the bug enemies.
 
-Arrive the river will win.
+Arrive the river will add 10 scores, get gem will add 5 scores.

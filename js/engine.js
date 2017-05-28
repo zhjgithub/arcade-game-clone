@@ -64,8 +64,23 @@ var Engine = (function(global) {
      * 注释了，你可以在这里实现，也可以在 app.js 对应的角色类里面实现。
      */
     function update(dt) {
+        checkCollisions();
         updateEntities(dt);
-        // checkCollisions();
+    }
+
+    function checkCollisions() {
+        var collided = false;
+
+        for (var i = 0; i < allEnemies.length; i++) {
+            if (allEnemies[i].checkCollision()) {
+                collided = true;
+                break;
+            }
+        }
+
+        if(!collided) {
+            item.checkCollision();
+        }
     }
 
     /* 这个函数会遍历在 app.js 定义的存放所有敌人实例的数组，并且调用他们的 update()
@@ -77,6 +92,7 @@ var Engine = (function(global) {
             enemy.update(dt);
         });
         player.update();
+        item.update();
     }
 
     /* 这个函数做了一些游戏的初始渲染，然后调用 renderEntities 函数。记住，这个函数
@@ -122,6 +138,7 @@ var Engine = (function(global) {
         });
 
         player.render();
+        item.render();
     }
 
     /* 这个函数现在没干任何事，但是这会是一个好地方让你来处理游戏重置的逻辑。可能是一个
@@ -130,7 +147,6 @@ var Engine = (function(global) {
      */
     function reset() {
         // 空操作
-        player.reset();
     }
 
     /* 紧接着我们来加载我们知道的需要来绘制我们游戏关卡的图片。然后把 init 方法设置为回调函数。
@@ -146,7 +162,10 @@ var Engine = (function(global) {
         'images/char-horn-girl.png',
         'images/char-pink-girl.png',
         'images/char-princess-girl.png',
-        'images/Selector.png'
+        'images/Selector.png',
+        'images/Gem Blue.png',
+        'images/Gem Green.png',
+        'images/Gem Orange.png',
     ]);
     Resources.onReady(init);
 
@@ -154,6 +173,4 @@ var Engine = (function(global) {
      * 对象。从而开发者就可以在他们的app.js文件里面更容易的使用它。
      */
     global.ctx = ctx;
-
-    return {reset: reset};
 })(this);
