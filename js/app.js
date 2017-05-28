@@ -90,7 +90,7 @@ Player.prototype.render = function () {
 /**
  * @description display the score on top right
  */
-player.prototype.displayScore = function () {
+Player.prototype.displayScore = function () {
     ctx.clearRect(505, 0, -100, 20);
     ctx.font = '16px sans-serif';
     ctx.textAlign = 'right';
